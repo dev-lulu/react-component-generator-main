@@ -10,6 +10,8 @@ const PROVIDER_CONFIG = {
   google: { label: 'Google', placeholder: 'AIza...' },
 } as const;
 
+type Theme = 'light' | 'dark';
+
 function App() {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
@@ -17,6 +19,11 @@ function App() {
   const [envKeys, setEnvKeys] = useState<Record<Provider, boolean>>({
     anthropic: false,
     google: false,
+  });
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('theme') as Theme | null;
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
   const { components, isLoading, error, generate, removeComponent, clearAll } =
     useComponentGenerator();
@@ -27,6 +34,15 @@ function App() {
       .then((data) => setEnvKeys(data.envKeys))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
 
   const hasEnvKey = envKeys[provider];
 
@@ -63,6 +79,14 @@ function App() {
             <span>Components</span>
             <strong>{components.length}</strong>
           </div>
+          <button
+            className="btn-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`${theme === 'light' ? '다크' : '라이트'} 모드로 전환`}
+            title={`${theme === 'light' ? '다크 모드' : '라이트 모드'}`}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
         </div>
       </header>
 
