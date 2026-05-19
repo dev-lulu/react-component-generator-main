@@ -5,4 +5,6 @@ export interface GeneratedComponent {
   prompt: string;
   code: string;
   createdAt: Date;
+  isStreaming?: boolean;
+  streamingText?: string;
 }
